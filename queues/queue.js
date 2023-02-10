@@ -1,31 +1,35 @@
 const Queue = require("bull");
-const Worker = require("worker_threads");
-
+const CustomerGroup = require("../constants/cGroups");
+const CONCURRENT_WORKERS_NUMBER = process.env.CONCURRENT_WORKERS_NUMBER;
 const emailQueue = new Queue("email-campaigns", {
-  redis: {
-    host: "127.0.0.1",
-    port: 6379
-  }
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: 6379
+    }
 });
 
-emailQueue.process(20, async (job) => {
-    // console.log('job', job.data)
+//Start 20 workers listening to queue
+emailQueue.process(CONCURRENT_WORKERS_NUMBER, async (job) => {
     sendEmails(job.data)
 })
 
 function sendEmails(job) {
-    console.log(`Sending email to with subject ${job.type}`)
-    if (job.type == 'tuna') {
+    console.log(`Sending email to ${job.group} subscribers`)
+    if (job.group == CustomerGroup.TUNA) {
         setTimeout(() => {
-            console.log(`Sent ${job.type}`);
-        }, Math.random(1000) * 5000); // adding random delay to simulate real-world scenario    
+            console.log(`Sent ${CustomerGroup.TUNA}`);
+        }, 10000); // adding random delay to simulate real-world scenario    
     }
-    if (job.type == 'shark') {
+    else if (job.group == CustomerGroup.SHARK) {
         setTimeout(() => {
-            console.log('Sent ${job.type}');
-        }, Math.random(10000) * 5000); // adding random delay to simulate real-world scenario    
+            console.log(`Sent emails to${CustomerGroup.SHARK} subscribers`);
+        }, 100000);
     }
-}  
-
+    else {
+        setTimeout(() => {
+            console.log(`Sent ${CustomerGroup.WHALE} subscribers`);
+        }, 1000000);
+    }
+}
 
 module.exports = emailQueue;
