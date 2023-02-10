@@ -10,6 +10,7 @@ const emailQueue = new Queue("email-campaigns", {
 
 //Start 20 workers listening to queue
 emailQueue.process(CONCURRENT_WORKERS_NUMBER, async (job) => {
+    //log the process status
     sendEmails(job.data)
 })
 

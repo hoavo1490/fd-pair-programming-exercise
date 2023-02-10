@@ -8,8 +8,8 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 })
 
-function getSubscribersByUserId(userId) {
-    pool.query(`SELECT * FROM subscribers WHERE subscribed_user_id = ${userId}`, (error, results) => {
+async function getSubscribersByUserId(userId) {
+    await pool.query(`SELECT * FROM subscribers WHERE subscribed_user_id = ${userId}`, (error, results) => {
         if (error) {
             throw error
         }
@@ -17,19 +17,29 @@ function getSubscribersByUserId(userId) {
     })
 }
 
-function saveCampaign(campaign) {
+async function saveCampaign(campaign) {
     const {
         user_id, html, send_time, subject, name
     } = campaign;
-    pool.query(`INSERT INTO campaigns (user_id, name, status, send_time, filter, html, subject)
-    VALUES (${user_id}, ${name}, ${CampaignStatus.PENDING}, ${send_time} , ${filter}, ${html}, ${subject});`)
+    await pool.query(`INSERT INTO campaigns (user_id, name, status, send_time, filter, html, subject)
+    VALUES (${user_id}, ${name}, ${CampaignStatus.PENDING}, ${send_time} , ${filter}, ${html}, ${subject});`, (error, results) => {
+        if (error) {
+            throw error
+        }
+        response.status(200).json(results.rows)
+    })
 }
 
-function updateCampaignStatus(campaign_id, status) {
-    pool.query(`UPDATE campaigns
+async function updateCampaignStatus(campaign_id, status) {
+    await pool.query(`UPDATE campaigns
     SET status = ${status}
     WHERE campaign_id = ${campaign_id};
-    `)
+    `, (error, results) => {
+        if (error) {
+            throw error
+        }
+        response.status(200).json(results.rows)
+    })
 }
 
 module.exports = {

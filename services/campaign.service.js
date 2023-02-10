@@ -29,10 +29,14 @@ async function addCampaignToQueue(emails, priority, sendTime) {
     let delay = 0;
     if (sendTime)
         delay = (sendTime.getTime() - new Date().getTime());
-    await emailQueue.add(emails, {
-        priority,
-        delay
-    });
+    try {
+        await emailQueue.add(emails, {
+            priority,
+            delay
+        });    
+    } catch (e) {
+        console.log("Can not add emails campaign to queue: ", e);
+    }
     //wait for finished and update campaign status with db.updateCampaignStatus()
 }
 
